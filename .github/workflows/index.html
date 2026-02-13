@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Thai Consonant Drill - [Your Team Name]</title>
+  <style>
+    :root { 
+      --bg:#0b1020; --card:#121a33; --muted:#9aa6c3; --text:#eaf0ff; 
+      --good:#34d399; --bad:#fb7185; --btn:#1f2a52; --heart:#fb7185;
+    }
+    body { 
+      margin:0; font-family: system-ui, -apple-system, sans-serif; 
+      background: var(--bg); color: var(--text); 
+      display: flex; justify-content: center; align-items: center; height: 100vh;
+    }
+    .container { 
+      background: var(--card); padding: 2rem; border-radius: 20px; 
+      text-align: center; width: 450px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+      border: 1px solid rgba(255,255,255,.07);
+    }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .team-name { font-weight: bold; color: var(--muted); font-size: 14px; }
+    .hearts { color: var(--heart); font-size: 1.5rem; letter-spacing: 5px; }
+    .big-char { font-size: 120px; line-height: 1; margin: 20px 0; color: var(--text); }
+    .prompt { color: var(--muted); margin-bottom: 20px; font-size: 14px; }
+    .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    button { 
+      background: var(--btn); color: var(--text); border: 1px solid rgba(255,255,255,.1); 
+      padding: 15px; border-radius: 12px; cursor: pointer; font-size: 1rem; transition: 0.2s; 
+    }
+    button:hover { filter: brightness(1.2); border-color: var(--text); }
+    .feedback { margin-top: 20px; height: 24px; font-weight: bold; font-size: 16px; }
+    #game-over-screen { display: none; }
+  </style>
+</head>
+<body>
+
+<div class="container" id="game-ui">
+    <div class="header">
+        <span class="team-name">[Your Team Name]</span>
+        <div id="heart-display" class="hearts">❤️❤️❤️</div>
+    </div>
+    
+    <div id="char-display" class="big-char">ก</div>
+    <div class="prompt">Select the correct name for this consonant</div>
+    
+    <div class="options-grid" id="options-container"></div>
+    
+    <div id="feedback" class="feedback"></div>
+</div>
+
+<div class="container" id="game-over-screen">
+    <h1 style="color: var(--bad);">Game Over</h1>
+    <p>You ran out of hearts!</p>
+    <button style="width: 100%;" onclick="location.reload()">Restart Drill</button>
+</div>
+
+<script>
+    // Full data based on your provided file content
+    const THAI_CONSONANTS = [
+        { letter:"ก", name:"ก ไก่", class:"mid", sound:"k" },
+        { letter:"ข", name:"ข ไข่", class:"high", sound:"kh" },
+        { letter:"ฃ", name:"ฃ ขวด", class:"high", sound:"kh" },
+        { letter:"ค", name:"ค ควาย", class:"low", sound:"kh" },
+        { letter:"ฅ", name:"ฅ คน", class:"low", sound:"kh" },
+        { letter:"ฆ", name:"ฆ ระฆัง", class:"low", sound:"kh" },
+        { letter:"ง", name:"ง งู", class:"low", sound:"ng" },
+        { letter:"จ", name:"จ จาน", class:"mid", sound:"ch" },
+        { letter:"ฉ", name:"ฉ ฉิ่ง", class:"high", sound:"ch" },
+        { letter:"ช", name:"ช ช้าง", class:"low", sound:"ch" },
+        { letter:"ซ", name:"ซ โซ่", class:"low", sound:"s" },
+        { letter:"ฌ", name:"ฌ เฌอ", class:"low", sound:"ch" },
+        { letter:"ญ", name:"ญ หญิง", class:"low", sound:"y" },
+        { letter:"ฎ", name:"ฎ ชฎา", class:"mid", sound:"d" },
+        { letter:"ฏ", name:"ฏ ปฏัก", class:"mid", sound:"t" },
+        { letter:"ฐ", name:"ฐ ฐาน", class:"high", sound:"th" },
+        { letter:"ฑ", name:"ฑ มณโฑ", class:"low", sound:"th" },
+        { letter:"ฒ", name:"ฒ ผู้เฒ่า", class:"low", sound:"th" },
+        { letter:"ณ", name:"ณ เณร", class:"low", sound:"n" },
+        { letter:"ด", name:"ด เด็ก", class:"mid", sound:"d" },
+        { letter:"ต", name:"ต เต่า", class:"mid", sound:"t" },
+        { letter:"ถ", name:"ถ ถุง", class:"high", sound:"th" },
+        { letter:"ท", name:"ท ทหาร", class:"low", sound:"th" },
+        { letter:"ธ", name:"ธ ธง", class:"low", sound:"th" },
+        { letter:"น", name:"น หนู", class:"low", sound:"n" },
+        { letter:"บ", name:"บ ใบไม้", class:"mid", sound:"b" },
+        { letter:"ป", name:"ป ปลา", class:"mid", sound:"p" },
+        { letter:"ผ", name:"ผ ผึ้ง", class:"high", sound:"ph" },
+        { letter:"ฝ", name:"ฝ ฝา", class:"high", sound:"f" },
+        { letter:"พ", name:"พ พาน", class:"low", sound:"ph" },
+        { letter:"ฟ", name:"ฟ ฟัน", class:"low", sound:"f" },
+        { letter:"ภ", name:"ภ สำเภา", class:"low", sound:"ph" },
+        { letter:"ม", name:"ม ม้า", class:"low", sound:"m" },
+        { letter:"ย", name:"ย ยักษ์", class:"low", sound:"y" },
+        { letter:"ร", name:"ร เรือ", class:"low", sound:"r" },
+        { letter:"ล", name:"ล ลิง", class:"low", sound:"l" },
+        { letter:"ว", name:"ว แหวน", class:"low", sound:"w" },
+        { letter:"ศ", name:"ศ ศาลา", class:"high", sound:"s" },
+        { letter:"ษ", name:"ษ ฤๅษี", class:"high", sound:"s" },
+        { letter:"ส", name:"ส เสือ", class:"high", sound:"s" },
+        { letter:"ห", name:"ห หีบ", class:"high", sound:"h" },
+        { letter:"ฬ", name:"ฬ จุฬา", class:"low", sound:"l" },
+        { letter:"อ", name:"อ อ่าง", class:"mid", sound:"(silent/ʔ)" },
+        { letter:"ฮ", name:"ฮ นกฮูก", class:"low", sound:"h" }
+    ];
+
+    let hearts = 3;
+    let currentTarget = null;
+
+    function nextQuestion() {
+        const feedback = document.getElementById('feedback');
+        feedback.innerText = "";
+        
+        // Select random consonant from the 44
+        currentTarget = THAI_CONSONANTS[Math.floor(Math.random() * THAI_CONSONANTS.length)];
+        document.getElementById('char-display').innerText = currentTarget.letter;
+
+        // Generate 4 random options (including the correct one)
+        let options = [currentTarget];
+        while (options.length < 4) {
+            let randomOpt = THAI_CONSONANTS[Math.floor(Math.random() * THAI_CONSONANTS.length)];
+            if (!options.includes(randomOpt)) options.push(randomOpt);
+        }
+        
+        // Shuffle options
+        options.sort(() => Math.random() - 0.5);
+
+        const container = document.getElementById('options-container');
+        container.innerHTML = "";
+        options.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.innerText = opt.name;
+            btn.onclick = () => checkAnswer(opt);
+            container.appendChild(btn);
+        });
+    }
+
+    function checkAnswer(selected) {
+        const feedback = document.getElementById('feedback');
+        if (selected.letter === currentTarget.letter) {
+            feedback.style.color = "var(--good)";
+            feedback.innerText = `Correct! ${currentTarget.letter} (${currentTarget.name}) - sound: '${currentTarget.sound}'`;
+            setTimeout(nextQuestion, 1200);
+        } else {
+            hearts--;
+            updateHeartDisplay();
+            feedback.style.color = "var(--bad)";
+            feedback.innerText = `Wrong! That was ${selected.name}`;
+            if (hearts <= 0) {
+                document.getElementById('game-ui').style.display = 'none';
+                document.getElementById('game-over-screen').style.display = 'block';
+            }
+        }
+    }
+
+    function updateHeartDisplay() {
+        document.getElementById('heart-display').innerText = "❤️".repeat(hearts);
+    }
+
+    // Start the game
+    nextQuestion();
+</script>
+
+</body>
+</html>
+
