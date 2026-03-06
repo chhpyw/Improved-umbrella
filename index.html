@@ -1,49 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Thai Consonant Drill - [Your Team Name]</title>
-  <style>
-    :root { 
-      --bg:#0b1020; --card:#121a33; --muted:#9aa6c3; --text:#eaf0ff; 
-      --good:#34d399; --bad:#fb7185; --btn:#1f2a52; --heart:#fb7185;
-    }
-    body { 
-      margin:0; font-family: system-ui, -apple-system, sans-serif; 
-      background: var(--bg); color: var(--text); 
-      display: flex; justify-content: center; align-items: center; height: 100vh;
-    }
-    .container { 
-      background: var(--card); padding: 2rem; border-radius: 20px; 
-      text-align: center; width: 450px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
-      border: 1px solid rgba(255,255,255,.07);
-    }
-    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .team-name { font-weight: bold; color: var(--muted); font-size: 14px; }
-    .hearts { color: var(--heart); font-size: 1.5rem; letter-spacing: 5px; }
-    .big-char { font-size: 120px; line-height: 1; margin: 20px 0; color: var(--text); }
-    .prompt { color: var(--muted); margin-bottom: 20px; font-size: 14px; }
-    .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    button { 
-      background: var(--btn); color: var(--text); border: 1px solid rgba(255,255,255,.1); 
-      padding: 15px; border-radius: 12px; cursor: pointer; font-size: 1rem; transition: 0.2s; 
-    }
-    button:hover { filter: brightness(1.2); border-color: var(--text); }
-    .feedback { margin-top: 20px; height: 24px; font-weight: bold; font-size: 16px; }
-    #game-over-screen { display: none; }
-  </style>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Thai Consonant Drill</title>
+    <style>
+        :root { 
+            --bg:#0b1020; --card:#121a33; --muted:#9aa6c3; --text:#eaf0ff; 
+            --good:#34d399; --bad:#fb7185; --btn:#1f2a52; --heart:#fb7185;
+            --accent: #6366f1;
+        }
+        body { 
+            margin:0; font-family: system-ui, -apple-system, sans-serif; 
+            background: var(--bg); color: var(--text); 
+            display: flex; justify-content: center; align-items: center; height: 100vh;
+        }
+        .container { 
+            background: var(--card); padding: 2.5rem; border-radius: 20px; 
+            text-align: center; width: 400px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); 
+            border: 1px solid rgba(255,255,255,.07);
+        }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .user-tag { font-weight: bold; color: var(--muted); font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
+        .hearts { color: var(--heart); font-size: 1.5rem; letter-spacing: 3px; }
+        
+        /* Typography */
+        h1 { margin: 0 0 10px 0; font-size: 1.8rem; }
+        .big-char { font-size: 120px; line-height: 1.2; margin: 10px 0; color: var(--text); text-shadow: 0 0 20px rgba(99,102,241,0.3); }
+        .prompt { color: var(--muted); margin-bottom: 25px; font-size: 15px; line-height: 1.4; }
+        
+        /* Inputs & Buttons */
+        input {
+            width: 100%; box-sizing: border-box; padding: 15px; border-radius: 12px; 
+            border: 2px solid var(--btn); background: #080d1a; color: var(--text); 
+            margin-bottom: 20px; text-align: center; font-size: 1.1rem; outline: none; transition: 0.3s;
+        }
+        input:focus { border-color: var(--accent); box-shadow: 0 0 10px rgba(99,102,241,0.2); }
+        
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        button { 
+            background: var(--btn); color: var(--text); border: 1px solid rgba(255,255,255,.1); 
+            padding: 15px; border-radius: 12px; cursor: pointer; font-size: 1rem; font-weight: 600; transition: 0.2s; 
+        }
+        button:hover { background: var(--accent); transform: translateY(-2px); }
+        button:active { transform: translateY(0); }
+        
+        .feedback { margin-top: 25px; height: 24px; font-weight: bold; font-size: 16px; }
+        
+        /* Screen Transitions */
+        #game-ui, #game-over-screen { display: none; }
+    </style>
 </head>
 <body>
 
+<div class="container" id="welcome-screen">
+    <h1>Sawatdee! 🙏</h1>
+    <p class="prompt">Master the 44 Thai consonants.<br>Enter your nickname to begin.</p>
+    <input type="text" id="nickname-input" placeholder="e.g. Somchai" maxlength="15" autofocus>
+    <button style="width: 100%;" onclick="startGame()">Start Drill</button>
+</div>
+
 <div class="container" id="game-ui">
     <div class="header">
-        <span class="team-name">[Your Team Name]</span>
+        <span id="user-display" class="user-tag">PLAYER</span>
         <div id="heart-display" class="hearts">❤️❤️❤️</div>
     </div>
     
     <div id="char-display" class="big-char">ก</div>
-    <div class="prompt">Select the correct name for this consonant</div>
+    <div class="prompt">Which consonant name is this?</div>
     
     <div class="options-grid" id="options-container"></div>
     
@@ -52,12 +76,11 @@
 
 <div class="container" id="game-over-screen">
     <h1 style="color: var(--bad);">Game Over</h1>
-    <p>You ran out of hearts!</p>
-    <button style="width: 100%;" onclick="location.reload()">Restart Drill</button>
+    <p id="game-over-msg">You ran out of hearts!</p>
+    <button style="width: 100%;" onclick="location.reload()">Try Again</button>
 </div>
 
 <script>
-    // Full data based on your provided file content
     const THAI_CONSONANTS = [
         { letter:"ก", name:"ก ไก่", class:"mid", sound:"k" },
         { letter:"ข", name:"ข ไข่", class:"high", sound:"kh" },
@@ -107,23 +130,37 @@
 
     let hearts = 3;
     let currentTarget = null;
+    let playerName = "";
+
+    // Allow pressing "Enter" in the input field
+    document.getElementById('nickname-input').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') startGame();
+    });
+
+    function startGame() {
+        const input = document.getElementById('nickname-input');
+        playerName = input.value.trim() || "Learner";
+        
+        document.getElementById('user-display').innerText = `👤 ${playerName}`;
+        document.getElementById('welcome-screen').style.display = 'none';
+        document.getElementById('game-ui').style.display = 'block';
+        
+        nextQuestion();
+    }
 
     function nextQuestion() {
         const feedback = document.getElementById('feedback');
         feedback.innerText = "";
         
-        // Select random consonant from the 44
         currentTarget = THAI_CONSONANTS[Math.floor(Math.random() * THAI_CONSONANTS.length)];
         document.getElementById('char-display').innerText = currentTarget.letter;
 
-        // Generate 4 random options (including the correct one)
         let options = [currentTarget];
         while (options.length < 4) {
             let randomOpt = THAI_CONSONANTS[Math.floor(Math.random() * THAI_CONSONANTS.length)];
-            if (!options.includes(randomOpt)) options.push(randomOpt);
+            if (!options.some(o => o.letter === randomOpt.letter)) options.push(randomOpt);
         }
         
-        // Shuffle options
         options.sort(() => Math.random() - 0.5);
 
         const container = document.getElementById('options-container');
@@ -131,25 +168,43 @@
         options.forEach(opt => {
             const btn = document.createElement('button');
             btn.innerText = opt.name;
-            btn.onclick = () => checkAnswer(opt);
+            btn.onclick = () => checkAnswer(opt, btn);
             container.appendChild(btn);
         });
     }
 
-    function checkAnswer(selected) {
+    function checkAnswer(selected, btn) {
         const feedback = document.getElementById('feedback');
+        // Disable buttons briefly to prevent double-clicking
+        const allBtns = document.querySelectorAll('.options-grid button');
+        allBtns.forEach(b => b.style.pointerEvents = 'none');
+
         if (selected.letter === currentTarget.letter) {
             feedback.style.color = "var(--good)";
-            feedback.innerText = `Correct! ${currentTarget.letter} (${currentTarget.name}) - sound: '${currentTarget.sound}'`;
-            setTimeout(nextQuestion, 1200);
+            feedback.innerText = `Correct! ${currentTarget.letter} is ${currentTarget.name}`;
+            btn.style.background = "var(--good)";
+            setTimeout(() => {
+                allBtns.forEach(b => b.style.pointerEvents = 'auto');
+                nextQuestion();
+            }, 1000);
         } else {
             hearts--;
             updateHeartDisplay();
             feedback.style.color = "var(--bad)";
-            feedback.innerText = `Wrong! That was ${selected.name}`;
+            feedback.innerText = `Incorrect! That was ${selected.name}`;
+            btn.style.background = "var(--bad)";
+            
             if (hearts <= 0) {
-                document.getElementById('game-ui').style.display = 'none';
-                document.getElementById('game-over-screen').style.display = 'block';
+                setTimeout(() => {
+                    document.getElementById('game-ui').style.display = 'none';
+                    document.getElementById('game-over-screen').style.display = 'block';
+                    document.getElementById('game-over-msg').innerText = `Keep practicing, ${playerName}! You'll get it next time.`;
+                }, 800);
+            } else {
+                // Re-enable buttons if game isn't over
+                setTimeout(() => {
+                    allBtns.forEach(b => b.style.pointerEvents = 'auto');
+                }, 800);
             }
         }
     }
@@ -157,9 +212,6 @@
     function updateHeartDisplay() {
         document.getElementById('heart-display').innerText = "❤️".repeat(hearts);
     }
-
-    // Start the game
-    nextQuestion();
 </script>
 
 </body>
