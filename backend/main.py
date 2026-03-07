@@ -24,7 +24,7 @@ app = FastAPI()
 # Enable CORS for your frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://improved-umbrella-xke8-service.onrender.com/increment"],
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
