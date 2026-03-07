@@ -153,17 +153,12 @@
             const data = await response.json();
             // 2. This updates the screen to show: 👤 Nickname (Count)
             document.getElementById('user-display').innerText = `👤 ${data.nickname} (${data.count})`;
-        } else {
-            document.getElementById('user-display').innerText = `👤 ${playerName}`;
-        }
+        } 
     } catch (error) {
         console.error("Backend error:", error);
         // Fallback if backend is down
         document.getElementById('user-display').innerText = `👤 ${playerName}`;
     }
-
-    document.getElementById('welcome-screen').style.display = 'none';
-    document.getElementById('game-ui').style.display = 'block';
     nextQuestion();
 }
     // -------------------------
