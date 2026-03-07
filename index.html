@@ -137,13 +137,20 @@
         if (e.key === 'Enter') startGame();
     });
 
- async function startGame() {
+async function startGame() {
     const input = document.getElementById('nickname-input');
     playerName = input.value.trim() || "Learner";
 
+    // MOVE THIS HERE: Show the game screen immediately
+    document.getElementById('welcome-screen').style.display = 'none';
+    document.getElementById('game-ui').style.display = 'block';
+    
+    // Set a temporary display while we wait for the backend
+    document.getElementById('user-display').innerText = `👤 ${playerName}`;
+
     try {
-        // 1. Change this URL to match your EXACT Render Backend URL
-        const response = await fetch('https://improved-umbrella-service.onrender.com/increment', {
+        // Use your specific Render backend URL
+        const response = await fetch('https://improved-umbrella-xke8-service.onrender.com/increment', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ nickname: playerName })
@@ -151,15 +158,14 @@
 
         if (response.ok) {
             const data = await response.json();
-            // 2. This updates the screen to show: 👤 Nickname (Count)
+            // Requirement: Display name and count from DB
             document.getElementById('user-display').innerText = `👤 ${data.nickname} (${data.count})`;
-        } 
+        }
     } catch (error) {
-        console.error("Backend error:", error);
-        // Fallback if backend is down
-        document.getElementById('user-display').innerText = `👤 ${playerName}`;
+        console.error("Backend connection failed:", error);
     }
-    nextQuestion();
+
+    nextQuestion(); // Start the first question
 }
     // -------------------------
     
